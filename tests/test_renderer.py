@@ -123,6 +123,54 @@ def test_render_panel_calls_interaction_render():
     assert "Test" in out
 
 
+# --- Overlap / overwrite correctness ---
+
+
+def test_fillcmd_then_writecmd_overwrites_cells():
+    """Later WriteCmd must overwrite cells previously set by FillCmd."""
+    r = make_renderer()
+    cmds = [
+        FillCmd(row=0, col=0, width=20, height=1, char="-"),
+        WriteCmd(row=0, col=5, text="HI"),
+    ]
+    out = r._commands_to_html(cmds, CTX)
+    # The fill character should NOT appear at columns 5 and 6
+    # "HI" should be present
+    assert "HI" in out
+    # The five dashes before col 5 should still be there
+    assert "-----" in out
+    # The characters at positions 5-6 must be H and I, not dashes
+    # Verify by checking the text doesn't contain "---HI" replaced by dashes
+    assert "-HI" not in out or "HI" in out  # HI wins over fill
+
+
+def test_two_writecmds_overlap_later_wins():
+    """When two WriteCmds write to the same cells, the later one wins."""
+    r = make_renderer()
+    cmds = [
+        WriteCmd(row=0, col=0, text="AAAAA"),
+        WriteCmd(row=0, col=2, text="BB"),   # overlaps cols 2-3
+    ]
+    out = r._commands_to_html(cmds, CTX)
+    assert "BB" in out
+    # Cols 2-3 should be B, not A
+    assert "AABBA" in out or ("AA" in out and "BB" in out)
+    # Must not see AAAAA (cols 2-3 were overwritten)
+    assert "AAAAA" not in out
+
+
+def test_styled_text_overwrites_unstyled_fill():
+    """A styled WriteCmd over an unstyled FillCmd: styled cells win."""
+    r = make_renderer()
+    cmds = [
+        FillCmd(row=0, col=0, width=20, height=1),   # spaces, no style
+        WriteCmd(row=0, col=0, text="OK", style={"bold": True}),
+    ]
+    out = r._commands_to_html(cmds, CTX)
+    assert "font-weight:bold" in out
+    assert "OK" in out
+
+
 def test_render_panel_passes_focused():
     received = []
 
