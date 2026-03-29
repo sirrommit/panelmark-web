@@ -14,6 +14,7 @@ dependencies = [
 
 [project.optional-dependencies]
 fastapi = ["fastapi", "uvicorn[standard]"]
+flask = ["flask", "flask-sock"]
 dev = ["pytest", "pytest-asyncio"]
 
 [tool.hatch.build.targets.wheel]

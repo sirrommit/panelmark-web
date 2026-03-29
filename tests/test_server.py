@@ -7,7 +7,7 @@ from panelmark.shell import Shell
 from panelmark.interactions.base import Interaction
 from panelmark.draw import WriteCmd, RenderContext
 
-from panelmark_web.server import handle_connection
+from panelmark_web.server import handle_connection, handle_connection_sync
 
 
 def run(coro):
@@ -243,3 +243,118 @@ def test_unknown_message_type_sends_error():
         assert "bogus" in ws.sent[0]["message"]
 
     run(_run())
+
+
+# ---------------------------------------------------------------------------
+# Sync handler tests (handle_connection_sync)
+# ---------------------------------------------------------------------------
+
+
+class SyncMockWebSocket:
+    """Synchronous in-memory WebSocket stub."""
+
+    def __init__(self, messages: list[dict]):
+        self._incoming = [json.dumps(m) for m in messages]
+        self.sent: list[dict] = []
+
+    def send(self, data: str):
+        self.sent.append(json.loads(data))
+
+    def receive(self):
+        if not self._incoming:
+            return None
+        return self._incoming.pop(0)
+
+
+class SyncMockWebSocketRaisesOnClose:
+    """Stub that raises ConnectionError when the queue is empty."""
+
+    class ConnectionClosed(Exception):
+        pass
+
+    def __init__(self, messages: list[dict]):
+        self._incoming = [json.dumps(m) for m in messages]
+        self.sent: list[dict] = []
+
+    def send(self, data: str):
+        self.sent.append(json.loads(data))
+
+    def receive(self):
+        if not self._incoming:
+            raise self.ConnectionClosed("closed")
+        return self._incoming.pop(0)
+
+
+def test_sync_connect_sends_render():
+    ws = SyncMockWebSocket([
+        {"type": "connect", "v": 1, "panels": [{"region": "main", "width": 40, "height": 10}]},
+    ])
+    handle_connection_sync(ws, make_shell_factory())
+    assert ws.sent[0]["type"] == "render"
+    assert ws.sent[0]["updates"][0]["region"] == "main"
+
+
+def test_sync_resize_sends_render():
+    ws = SyncMockWebSocket([
+        {"type": "resize", "v": 1, "panels": [{"region": "main", "width": 60, "height": 20}]},
+    ])
+    handle_connection_sync(ws, make_shell_factory())
+    assert ws.sent[0]["type"] == "render"
+
+
+def test_sync_key_arrow_is_mapped():
+    received_keys = []
+
+    class TrackingInteraction(Interaction):
+        def render(self, context, focused=False):
+            return [WriteCmd(row=0, col=0, text="x")]
+
+        def handle_key(self, key):
+            received_keys.append(key)
+            return False, None
+
+        def get_value(self):
+            return None
+
+        def set_value(self, value):
+            pass
+
+    def factory():
+        shell = Shell(SHELL_DEF)
+        shell.assign("main", TrackingInteraction())
+        shell.set_focus("main")
+        return shell
+
+    ws = SyncMockWebSocket([{"type": "key", "v": 1, "key": "ArrowUp"}])
+    handle_connection_sync(ws, factory)
+    assert received_keys == ["KEY_UP"]
+
+
+def test_sync_escape_sends_exit():
+    ws = SyncMockWebSocket([{"type": "key", "v": 1, "key": "Escape"}])
+    handle_connection_sync(ws, make_shell_factory())
+    types = [m["type"] for m in ws.sent]
+    assert "exit" in types
+
+
+def test_sync_signal_return_sends_exit():
+    ws = SyncMockWebSocket([{"type": "key", "v": 1, "key": "KEY_ENTER"}])
+    handle_connection_sync(ws, make_shell_factory(ExitInteraction))
+    types = [m["type"] for m in ws.sent]
+    assert "exit" in types
+
+
+def test_sync_unknown_type_sends_error():
+    ws = SyncMockWebSocket([{"type": "bogus", "v": 1}])
+    handle_connection_sync(ws, make_shell_factory())
+    assert ws.sent[0]["type"] == "error"
+
+
+def test_sync_none_receive_closes_gracefully():
+    ws = SyncMockWebSocket([])  # empty — receive() returns None immediately
+    handle_connection_sync(ws, make_shell_factory())  # must not raise
+
+
+def test_sync_exception_on_receive_closes_gracefully():
+    ws = SyncMockWebSocketRaisesOnClose([])
+    handle_connection_sync(ws, make_shell_factory())  # must not raise

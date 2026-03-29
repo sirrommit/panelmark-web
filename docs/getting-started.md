@@ -18,14 +18,15 @@ rendering of interaction content inside panel bodies.
 ## Install
 
 ```bash
-pip install panelmark-web[fastapi]
+pip install panelmark-web[fastapi]   # FastAPI / Starlette
+pip install panelmark-web[flask]     # Flask + flask-sock
 ```
 
 Or from source:
 
 ```bash
 cd panelmark-web
-pip install -e ".[fastapi]"
+pip install -e ".[fastapi]"   # or .[flask]
 ```
 
 ---
@@ -192,7 +193,27 @@ See `panelmark-html/docs/hook-contract.md` for the full property list.
 
 ---
 
-## Full example
+## Flask / flask-sock
 
-See [`examples/fastapi_app.py`](../examples/fastapi_app.py) for a working
-two-panel server (echo editor + status bar).
+Use `handle_connection_sync` with `flask-sock`:
+
+```python
+from flask import Flask
+from flask_sock import Sock
+from panelmark_web.server import handle_connection_sync
+
+app = Flask(__name__)
+sock = Sock(app)
+
+@sock.route("/ws")
+def ws_endpoint(ws):
+    handle_connection_sync(ws, shell_factory=make_shell)
+```
+
+`handle_connection_sync` expects `ws.receive()` to return `None` (or raise)
+when the connection closes — which is exactly what `flask-sock` does.
+
+## Full examples
+
+- [`examples/fastapi_app.py`](../examples/fastapi_app.py) — FastAPI (async)
+- [`examples/flask_app.py`](../examples/flask_app.py) — Flask + flask-sock (sync)
