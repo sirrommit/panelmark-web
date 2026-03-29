@@ -88,8 +88,17 @@ not embed its own focused-state CSS.
 ## Server-side rendering flow
 
 The Python side (`Session`, `DrawCommandRenderer`) produces HTML strings from
-draw commands.  These are sent to the browser as the `html` field in `render`
-update objects and assigned directly to `.pm-panel-body` innerHTML.
+the draw commands returned by `Interaction.render()`.  These are sent to the
+browser as the `html` field in `render` update objects and assigned directly
+to `.pm-panel-body` innerHTML.
+
+The HTML is generated from the core `panelmark` draw-command types (`WriteCmd`,
+`FillCmd`).  It is not produced from a renderer-specific interaction catalog —
+`panelmark-web` does not currently ship built-in web implementations of
+`MenuReturn`, `TextBox`, or any other portable-library interaction.  Any
+`Interaction` subclass whose `render()` method returns standard draw commands
+will work; interactions that rely on renderer-specific features beyond the draw
+command set may require additional work.
 
 The HTML format produced by `DrawCommandRenderer` is intentionally simple:
 one `<pre>` element per row, with inline `<span style="...">` elements for

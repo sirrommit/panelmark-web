@@ -1,9 +1,18 @@
 # Getting Started with panelmark-web
 
-`panelmark-web` is a live web renderer for the panelmark ecosystem.  It sits
-on top of `panelmark-html`'s static structure and adds a real-time browser
-interface: WebSocket-driven keyboard input, focus transitions, and live
-rendering of interaction content inside panel bodies.
+`panelmark-web` is a live web session runtime for the panelmark ecosystem.
+It provides the transport and rendering infrastructure to host
+`panelmark.Interaction` objects in a browser: WebSocket-driven keyboard input,
+focus transitions, and live rendering of interaction content inside panel
+bodies.
+
+**Current scope:** `panelmark-web` hosts arbitrary server-side `Interaction`
+objects through the core draw-command path.  It does not yet ship a built-in
+interaction or widget library.  You must supply your own interactions (or use
+a future release that implements the portable standard library).  The
+draw-command renderer handles `WriteCmd` and `FillCmd`; more complex
+interactions that depend on renderer-specific features beyond draw commands
+may require additional renderer work.
 
 ---
 
