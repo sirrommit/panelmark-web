@@ -52,9 +52,19 @@
     return w;
   }
 
-  function connect() {
+  function resolveWsUrl() {
+    // Read data-pm-ws-url from the shell root element if present.
+    // Falls back to /ws on the current host.
+    const shell = document.querySelector('[data-pm-shell]');
+    const path = (shell && shell.dataset.pmWsUrl) || '/ws';
+    // path may be an absolute ws(s):// URL or a relative path
+    if (/^wss?:\/\//.test(path)) return path;
     const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const url = protocol + '//' + location.host + '/ws';
+    return protocol + '//' + location.host + path;
+  }
+
+  function connect() {
+    const url = resolveWsUrl();
     socket = new WebSocket(url);
 
     socket.addEventListener('open', function () {

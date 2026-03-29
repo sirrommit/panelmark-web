@@ -20,6 +20,7 @@ from panelmark_html import render_document
 
 from panelmark_web.server import handle_connection
 from panelmark_web.adapters import StarletteAdapter
+from panelmark_web.page import prepare_page
 
 
 # ---------------------------------------------------------------------------
@@ -116,13 +117,7 @@ app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static")
 async def index():
     shell = make_shell()
     page_html = render_document(shell)
-    # Inject the client script before </body>
-    script_tag = '<script src="/static/client.js"></script>'
-    if "</body>" in page_html:
-        page_html = page_html.replace("</body>", script_tag + "\n</body>")
-    else:
-        page_html += "\n" + script_tag
-    return page_html
+    return prepare_page(page_html, ws_url="/ws", script_src="/static/client.js")
 
 
 @app.websocket("/ws")

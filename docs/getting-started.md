@@ -113,6 +113,7 @@ from fastapi.staticfiles import StaticFiles
 from panelmark_html import render_document
 from panelmark_web.server import handle_connection
 from panelmark_web.adapters import StarletteAdapter
+from panelmark_web.page import prepare_page
 
 app = FastAPI()
 
@@ -125,11 +126,7 @@ app.mount("/static", StaticFiles(directory=str(_static)), name="static")
 async def index():
     shell = make_shell()
     html = render_document(shell)
-    # Inject the JS client
-    script = '<script src="/static/client.js"></script>'
-    if "</body>" in html:
-        html = html.replace("</body>", script + "\n</body>")
-    return html
+    return prepare_page(html, ws_url="/ws", script_src="/static/client.js")
 
 
 @app.websocket("/ws")
@@ -137,6 +134,10 @@ async def ws_endpoint(websocket: WebSocket):
     await websocket.accept()
     await handle_connection(StarletteAdapter(websocket), shell_factory=make_shell)
 ```
+
+`prepare_page` injects `data-pm-ws-url` on the shell root element and the
+`<script>` tag before `</body>`.  The browser client reads `data-pm-ws-url`
+to know which WebSocket endpoint to connect to.
 
 `StarletteAdapter` translates Starlette's `receive_text()` / `send_text()` API
 into the `recv()` / `send()` interface that `handle_connection` expects.
@@ -207,6 +208,25 @@ See `panelmark-html/docs/hook-contract.md` for the full property list.
 
 ---
 
+## WebSocket URL configuration
+
+By default `prepare_page` sets `ws_url="/ws"`.  Override it for apps mounted
+under a subpath or using a different endpoint:
+
+```python
+# App mounted at /myapp — websocket at /myapp/ws
+prepare_page(html, ws_url="/myapp/ws", script_src="/myapp/static/client.js")
+
+# Absolute URL (cross-origin or non-standard port)
+prepare_page(html, ws_url="wss://ws.example.com/ws")
+```
+
+The browser client reads `data-pm-ws-url` from the shell root element
+(`[data-pm-shell]`) at connect time.  Relative paths are resolved against the
+current page host automatically.
+
+---
+
 ## Flask / flask-sock
 
 Use `handle_connection_sync` with `flask-sock`:
@@ -214,10 +234,17 @@ Use `handle_connection_sync` with `flask-sock`:
 ```python
 from flask import Flask
 from flask_sock import Sock
+from panelmark_html import render_document
 from panelmark_web.server import handle_connection_sync
+from panelmark_web.page import prepare_page
 
 app = Flask(__name__)
 sock = Sock(app)
+
+@app.get("/")
+def index():
+    html = render_document(make_shell())
+    return prepare_page(html, ws_url="/ws", script_src="/static/client.js")
 
 @sock.route("/ws")
 def ws_endpoint(ws):

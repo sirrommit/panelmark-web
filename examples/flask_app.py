@@ -21,6 +21,7 @@ from panelmark.draw import WriteCmd, FillCmd, RenderContext
 from panelmark_html import render_document
 
 from panelmark_web.server import handle_connection_sync
+from panelmark_web.page import prepare_page
 
 
 # ---------------------------------------------------------------------------
@@ -112,13 +113,7 @@ _static_dir = pathlib.Path(__file__).parent.parent / "panelmark_web" / "static"
 def index():
     shell = make_shell()
     page_html = render_document(shell)
-    # Inject the client script and a route to serve it
-    script_tag = '<script src="/static/client.js"></script>'
-    if "</body>" in page_html:
-        page_html = page_html.replace("</body>", script_tag + "\n</body>")
-    else:
-        page_html += "\n" + script_tag
-    return page_html
+    return prepare_page(page_html, ws_url="/ws", script_src="/static/client.js")
 
 
 @app.get("/static/client.js")
