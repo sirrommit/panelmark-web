@@ -127,13 +127,13 @@ def test_render_all_uses_stored_sizes():
 
 def test_process_key_returns_continue():
     session = make_session()
-    result, updates = session.process_key("a")
+    result, updates, _focus = session.process_key("a")
     assert result == "continue"
 
 
 def test_process_key_returns_update_dicts():
     session = make_session()
-    result, updates = session.process_key("a")
+    result, updates, _focus = session.process_key("a")
     # dirty_regions may or may not be populated depending on shell internals
     assert isinstance(updates, list)
     for u in updates:
@@ -153,7 +153,7 @@ def test_process_key_exit_result():
     shell.assign("main", ExitInteraction())
     shell.set_focus("main")
     session = Session(shell)
-    result, updates = session.process_key("KEY_ENTER")
+    result, updates, _focus = session.process_key("KEY_ENTER")
     assert result == "exit"
 
 
@@ -174,6 +174,19 @@ def test_render_region_unassigned_returns_empty_html():
     u = session._render_region("main")
     assert u["html"] == ""
     assert u["focused"] is False
+
+
+def test_process_key_focus_region_none_when_dirty():
+    shell = Shell(TWO_REGION)
+    for name in shell.regions:
+        shell.assign(name, StubInteraction())
+    shell.set_focus("left")
+    shell.mark_all_clean()
+    session = Session(shell)
+    # Tab marks both regions dirty, so focus_region should be None
+    _result, updates, focus_region = session.process_key("KEY_TAB")
+    assert focus_region is None
+    assert len(updates) == 2
 
 
 def test_render_region_focused_flag():

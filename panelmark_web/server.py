@@ -41,7 +41,7 @@ async def handle_connection(websocket, shell_factory):
             case "key":
                 raw_key = msg.get("key", "")
                 pm_key = BROWSER_TO_PM.get(raw_key, raw_key)
-                result, updates = session.process_key(pm_key)
+                result, updates, focus_region = session.process_key(pm_key)
                 if updates:
                     await websocket.send(
                         json.dumps(
@@ -49,6 +49,16 @@ async def handle_connection(websocket, shell_factory):
                                 "v": PROTOCOL_VERSION,
                                 "type": "render",
                                 "updates": updates,
+                            }
+                        )
+                    )
+                elif focus_region is not None:
+                    await websocket.send(
+                        json.dumps(
+                            {
+                                "v": PROTOCOL_VERSION,
+                                "type": "focus",
+                                "region": focus_region,
                             }
                         )
                     )

@@ -131,6 +131,35 @@ def test_resize_sends_render():
 # --- key ---
 
 
+def test_key_tab_sends_render_for_both_panels():
+    TWO_REGION = """
+|=====|
+|{12R $left$ }|{12R $right$ }|
+|=====|
+"""
+
+    def factory():
+        shell = Shell(TWO_REGION)
+        for name in shell.regions:
+            shell.assign(name, StubInteraction())
+        shell.set_focus("left")
+        shell.mark_all_clean()
+        return shell
+
+    async def _run():
+        ws = MockWebSocket([
+            {"type": "key", "v": 1, "key": "Tab"},
+        ])
+        await handle_connection(ws, factory)
+        assert len(ws.sent) == 1
+        msg = ws.sent[0]
+        assert msg["type"] == "render"
+        regions = {u["region"] for u in msg["updates"]}
+        assert regions == {"left", "right"}
+
+    run(_run())
+
+
 def test_key_sends_render_when_dirty():
     async def _run():
         ws = MockWebSocket([

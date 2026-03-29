@@ -27,15 +27,27 @@ class Session:
             if region:
                 self.panel_sizes[region] = (int(width), int(height))
 
-    def process_key(self, key: str) -> tuple[str, list[dict]]:
-        """Feed key to shell; return (result, list of render-update dicts).
+    def process_key(self, key: str) -> tuple[str, list[dict], str | None]:
+        """Feed key to shell; return (result, render_updates, focus_region).
 
-        result is 'exit' or 'continue'.
+        result        -- 'exit' or 'continue'
+        render_updates -- list of {region, html, focused} dicts for dirty regions
+        focus_region  -- focused region name when focus changed but no regions
+                         were dirty (i.e. only a focus message is needed);
+                         None otherwise
         """
-        result, value = self.shell.handle_key(key)
-        updates = [self._render_region(name) for name in self.shell.dirty_regions]
+        focus_before = self.shell.focus
+        result, _value = self.shell.handle_key(key)
+        dirty = self.shell.dirty_regions
+        updates = [self._render_region(name) for name in dirty]
         self.shell.mark_all_clean()
-        return result, updates
+
+        # If focus changed but nothing was rendered, surface a focus-only signal
+        focus_region = None
+        if not updates and self.shell.focus != focus_before:
+            focus_region = self.shell.focus
+
+        return result, updates, focus_region
 
     def render_all(self) -> list[dict]:
         """Render every named panel; used on initial connect."""

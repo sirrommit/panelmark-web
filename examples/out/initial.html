@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>panelmark-web example</title>
+    <style>
+/* panelmark-html base styles
+ *
+ * All visual values are controlled by CSS custom properties.
+ * Override any variable in your own stylesheet to theme the shell.
+ *
+ * Custom properties
+ * -----------------
+ * --pm-border-color        border / divider colour
+ * --pm-border-width        thickness of all borders and dividers
+ * --pm-gap                 gap between sibling panels (not used by default;
+ *                          override to add spacing between panels)
+ * --pm-radius              corner radius on panels
+ * --pm-heading-font-weight heading font weight
+ * --pm-panel-padding       padding inside panel body and heading
+ * --pm-focused-border-color  border colour on the focused panel
+ * --pm-focused-border-width  border thickness on the focused panel
+ */
+
+:root {
+  --pm-border-color: #888;
+  --pm-border-width: 1px;
+  --pm-gap: 0px;
+  --pm-radius: 0px;
+  --pm-heading-font-weight: bold;
+  --pm-panel-padding: 0.5rem;
+  --pm-focused-border-color: #4a9eff;
+  --pm-focused-border-width: 2px;
+}
+
+/* Shell container --------------------------------------------------------- */
+
+.pm-shell {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: monospace, monospace;
+  font-size: 0.875rem;
+  border: var(--pm-border-width) solid var(--pm-border-color);
+  border-radius: var(--pm-radius);
+}
+
+/* Splits ------------------------------------------------------------------ */
+
+.pm-split {
+  display: flex;
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  gap: var(--pm-gap);
+}
+
+.pm-split-h {
+  flex-direction: column;
+}
+
+.pm-split-v {
+  flex-direction: row;
+}
+
+/* Single-pixel dividers between sibling panels, without double borders */
+.pm-split-h > * + * {
+  border-top: var(--pm-border-width) solid var(--pm-border-color);
+}
+
+.pm-split-v > * + * {
+  border-left: var(--pm-border-width) solid var(--pm-border-color);
+}
+
+/* Panels ------------------------------------------------------------------ */
+
+.pm-panel[data-pm-focused="true"] {
+  outline: var(--pm-focused-border-width) solid var(--pm-focused-border-color);
+  outline-offset: -1px;
+}
+
+.pm-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.pm-panel-heading {
+  flex-shrink: 0;
+  box-sizing: border-box;
+  padding: 0.25rem var(--pm-panel-padding);
+  font-weight: var(--pm-heading-font-weight);
+  border-bottom: var(--pm-border-width) solid var(--pm-border-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pm-panel-body {
+  flex: 1 1 0;
+  min-height: 0;
+  box-sizing: border-box;
+  padding: var(--pm-panel-padding);
+  overflow: auto;
+}
+
+    </style>
+</head>
+<body>
+<div class="pm-shell" data-pm-shell>
+  <div class="pm-split pm-split-h">
+    <div class="pm-split pm-split-h">
+      <section class="pm-panel" data-pm-region="editor" data-pm-kind="panel" id="pm-region-editor" data-pm-interaction="__main__.EchoEditor" data-pm-focusable="true" data-pm-focused="true">
+        <div class="pm-panel-body"></div>
+      </section>
+      <div class="pm-split pm-split-h">
+        <section class="pm-panel" data-pm-region="status" data-pm-kind="panel" id="pm-region-status" data-pm-interaction="__main__.StatusBar" data-pm-focusable="false" data-pm-focused="false">
+          <div class="pm-panel-body"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/static/client.js"></script>
+</body>
+</html>
+
