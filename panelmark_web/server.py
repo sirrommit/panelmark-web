@@ -10,8 +10,16 @@ from .session import Session
 def _dispatch(session: Session, raw: str) -> tuple[str | None, str | None]:
     """Process one raw JSON message against a session.
 
-    Returns (outgoing_json, action) where action is 'exit' or None.
-    outgoing_json is None if no reply should be sent.
+    Returns ``(outgoing_json, action)`` where:
+
+    - ``outgoing_json`` is the JSON string to send back (render, focus, or
+      error message), or ``None`` if no reply is needed.
+    - ``action`` is ``'exit'`` when the shell has signalled exit, otherwise
+      ``None``.
+
+    When ``action`` is ``'exit'``, ``outgoing_json`` may still be non-None
+    (a render or focus update triggered by the same key event).  Callers must
+    send ``outgoing_json`` first, then send a separate ``exit`` message.
     """
     msg = json.loads(raw)
     match msg.get("type"):
@@ -39,8 +47,6 @@ def _dispatch(session: Session, raw: str) -> tuple[str | None, str | None]:
                 reply = None
 
             if result == "exit":
-                exit_msg = json.dumps({"v": PROTOCOL_VERSION, "type": "exit"})
-                # Send render/focus update first (if any), then exit
                 return reply, "exit"
 
             return reply, None

@@ -236,6 +236,39 @@ def test_key_signal_return_sends_exit():
     run(_run())
 
 
+# --- exit ordering ---
+
+
+def test_render_sent_before_exit():
+    """When a key triggers both a render update and an exit, render comes first."""
+    async def _run():
+        ws = MockWebSocket([
+            {"type": "key", "v": 1, "key": "KEY_ENTER"},
+        ])
+        await handle_connection(ws, make_shell_factory(ExitInteraction))
+        types = [m["type"] for m in ws.sent]
+        assert "exit" in types
+        exit_index = types.index("exit")
+        # Any render/focus message must precede the exit message
+        for i, t in enumerate(types):
+            if t in ("render", "focus"):
+                assert i < exit_index, f"{t} at index {i} came after exit at {exit_index}"
+
+    run(_run())
+
+
+def test_sync_render_sent_before_exit():
+    """Same ordering guarantee for the sync handler."""
+    ws = SyncMockWebSocket([{"type": "key", "v": 1, "key": "KEY_ENTER"}])
+    handle_connection_sync(ws, make_shell_factory(ExitInteraction))
+    types = [m["type"] for m in ws.sent]
+    assert "exit" in types
+    exit_index = types.index("exit")
+    for i, t in enumerate(types):
+        if t in ("render", "focus"):
+            assert i < exit_index
+
+
 # --- unknown message type ---
 
 
