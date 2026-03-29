@@ -385,9 +385,9 @@ Required widgets from the current portable-library spec:
 
 ### 10.1 Add widget module structure
 
-- [ ] Add a package such as `panelmark_web/widgets/`.
-- [ ] Add `__init__.py` exports for the required widgets.
-- [ ] Keep naming aligned with the portable library.
+- [x] Add a package such as `panelmark_web/widgets/`.
+- [x] Add `__init__.py` exports for the required widgets.
+- [x] Keep naming aligned with the portable library.
 
 Implementation guidance:
 
@@ -410,36 +410,36 @@ Suggested order:
 
 For each widget:
 
-- [ ] match portable constructor signature as closely as the current spec allows
-- [ ] implement portable return semantics
-- [ ] add tests
+- [x] match portable constructor signature as closely as the current spec allows
+- [x] implement portable return semantics
+- [x] add tests
 - [ ] add browser/session integration coverage if applicable
-- [ ] document it
+- [x] document it
 
 Widget-specific notes:
 
 - `Alert`
-  - [ ] returns `True` when dismissed, `None` on cancel/close if applicable
+  - [x] returns `True` when dismissed, `None` on cancel/close if applicable
 - `Confirm`
-  - [ ] returns mapped button value
+  - [x] returns mapped button value
 - `InputPrompt`
-  - [ ] returns entered text or `None`
+  - [x] returns entered text or `None`
 - `ListSelect`
-  - [ ] support single and multi modes with specified semantics
+  - [x] support single and multi modes with specified semantics
 - `DataclassForm`
-  - [ ] wrap `DataclassFormInteraction`
+  - [x] wrap `DataclassFormInteraction`
 - `FilePicker`
-  - [ ] decide whether the first implementation uses browser-native file
+  - [x] decide whether the first implementation uses browser-native file
     selection or a panelmark-managed picker
-  - [ ] whichever path is chosen, keep the portable return contract honest
+  - [x] whichever path is chosen, keep the portable return contract honest
 
 
 ### 10.3 Re-evaluate portability claim after widgets land
 
-- [ ] Only after required interactions and widgets are implemented, decide
+- [x] Only after required interactions and widgets are implemented, decide
   whether `panelmark-web` can claim `portable-library-compatible`.
-- [ ] If yes, add that claim explicitly in docs.
-- [ ] If not, document the remaining gaps clearly.
+- [x] If yes, add that claim explicitly in docs.
+- [x] If not, document the remaining gaps clearly.
 
 
 ## Verification checklist
@@ -455,8 +455,8 @@ Before considering this work done, verify all of the following:
 - [x] The websocket URL is configurable instead of being hardcoded to `/ws`.
 - [x] Examples match the actual public API.
 - [x] Tests cover the renderer overlap fix and the async server contract.
-- [ ] If Phase 9 was completed, required interactions match the portable spec.
-- [ ] If Phase 10 was completed, required widgets match the portable spec.
+- [x] If Phase 9 was completed, required interactions match the portable spec.
+- [x] If Phase 10 was completed, required widgets match the portable spec.
 
 
 ## Do not do in this pass

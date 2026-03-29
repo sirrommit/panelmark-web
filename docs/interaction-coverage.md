@@ -8,26 +8,48 @@ are implemented in `panelmark-web`.
 
 ## Current status
 
-`panelmark-web` is a **core-renderer-compatible** runtime.  All eight required
-portable interactions are now implemented in `panelmark_web.interactions`.
-Required widgets are not yet implemented.
+All required portable interactions and widgets are implemented.
+`panelmark-web` claims **`portable-library-compatible`** status with one noted
+difference from the blocking-modal semantics described in the spec — see
+[Web note](#web-note) below.
 
 ```python
+# Interactions
 from panelmark_web.interactions import (
     StatusMessage, MenuReturn, RadioList, CheckBox,
     TextBox, NestedMenu, FormInput, DataclassFormInteraction,
-    Leaf,  # explicit leaf marker for NestedMenu
+    Leaf,
+)
+
+# Widgets
+from panelmark_web.widgets import (
+    Alert, Confirm, InputPrompt, ListSelect,
+    DataclassForm, FilePicker,
 )
 ```
 
 ---
 
+## Web note
+
+The portable-library spec describes widgets as blocking: `widget.show(sh)`
+returns only after the user acts.  In `panelmark-web` the session is
+inherently async — there is no call that blocks a coroutine until a widget
+is dismissed.
+
+**Web-appropriate pattern:** assign the widget to a panel region and rely on
+`signal_return()` to fire when the user acts.  The WebSocket session
+lifecycle delivers the result automatically.
+
+All constructor signatures, `get_value()` / `set_value()` / `signal_return()`
+semantics, and return values match the portable spec exactly.
+
+---
+
 ## Required interactions
 
-These are required for `portable-library-compatible` status.
-
-| Interaction | Status | Notes |
-|-------------|--------|-------|
+| Interaction | Status | Module |
+|-------------|--------|--------|
 | `StatusMessage` | **Implemented** | `panelmark_web.interactions.StatusMessage` |
 | `MenuReturn` | **Implemented** | `panelmark_web.interactions.MenuReturn` |
 | `NestedMenu` | **Implemented** | `panelmark_web.interactions.NestedMenu` |
@@ -41,23 +63,18 @@ These are required for `portable-library-compatible` status.
 
 ## Required widgets
 
-These modal widgets are also required for `portable-library-compatible` status.
-
-| Widget | Status | Notes |
-|--------|--------|-------|
-| `Alert` | Not implemented | — |
-| `Confirm` | Not implemented | — |
-| `InputPrompt` | Not implemented | — |
-| `ListSelect` | Not implemented | — |
-| `DataclassForm` | Not implemented | — |
-| `FilePicker` | Not implemented | — |
+| Widget | Status | Module |
+|--------|--------|--------|
+| `Alert` | **Implemented** | `panelmark_web.widgets.Alert` |
+| `Confirm` | **Implemented** | `panelmark_web.widgets.Confirm` |
+| `InputPrompt` | **Implemented** | `panelmark_web.widgets.InputPrompt` |
+| `ListSelect` | **Implemented** | `panelmark_web.widgets.ListSelect` |
+| `DataclassForm` | **Implemented** | `panelmark_web.widgets.DataclassForm` |
+| `FilePicker` | **Implemented** (server-side filesystem browser) | `panelmark_web.widgets.FilePicker` |
 
 ---
 
 ## Frequently implemented (optional)
-
-These are not required but renderers that provide them should follow the
-portable-library API contracts.
 
 | Interaction / Widget | Status | Notes |
 |----------------------|--------|-------|
@@ -72,9 +89,7 @@ portable-library API contracts.
 
 ---
 
-## What is implemented
-
-The draw-command renderer handles:
+## Draw-command renderer
 
 | Draw command | Support |
 |--------------|---------|
@@ -83,27 +98,11 @@ The draw-command renderer handles:
 | `CursorCmd` | Ignored — HTML renderers do not render a text cursor |
 
 Any custom `Interaction` whose `render()` produces only `WriteCmd` and
-`FillCmd` commands will work out of the box.  Interactions that rely on
-renderer-specific behaviour beyond the draw-command set (e.g. native input
-elements, browser file pickers) require additional work outside the current
-scope of `panelmark-web`.
+`FillCmd` commands will work out of the box.
 
 ---
 
 ## Roadmap
 
-Required widgets remain:
-
-1. `Alert`
-2. `Confirm`
-3. `InputPrompt`
-4. `ListSelect`
-5. `DataclassForm`
-6. `FilePicker`
-
-Followed by frequently-implemented extras.
-
-`portable-library-compatible` status will be evaluated after the required
-widget set is implemented.
-
-This document will be updated as items are completed.
+Frequently-implemented extras (`MenuFunction`, `ListView`, `TreeView`,
+`TableView`, `DatePicker`, `Progress`, `Spinner`, `Toast`) are future work.

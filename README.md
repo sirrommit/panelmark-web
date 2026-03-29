@@ -19,19 +19,20 @@ WebSocket connection is the session lifetime.
 
 ---
 
-## What it is not
+## What it includes
 
-**`panelmark-web` does not yet ship a built-in interaction or widget library.**
+Beyond the transport and rendering infrastructure, `panelmark-web` ships
+built-in implementations of the full portable standard library:
 
-It provides the transport and rendering infrastructure to host any
-`panelmark.Interaction` object in a browser.  The interactions themselves —
-`MenuReturn`, `TextBox`, `RadioList`, `CheckBox`, `FormInput`, and so on — are
-defined in the [panelmark portable-library spec](https://github.com/sirrommit/panelmark/blob/main/docs/renderer-spec/portable-library.md)
-but are not yet implemented in this package.
+- **Interactions** (`panelmark_web.interactions`): `StatusMessage`,
+  `MenuReturn`, `RadioList`, `CheckBox`, `TextBox`, `NestedMenu`,
+  `FormInput`, `DataclassFormInteraction`
+- **Widgets** (`panelmark_web.widgets`): `Alert`, `Confirm`, `InputPrompt`,
+  `ListSelect`, `DataclassForm`, `FilePicker`
 
-The current package hosts arbitrary server-side `Interaction` objects through
-the core draw-command path.  Application code must supply its own interactions,
-or wait for a future release that implements the portable standard library.
+Application code can also supply arbitrary custom `Interaction` objects — any
+`render()` method that returns `WriteCmd` and `FillCmd` commands works out of
+the box.
 
 See [docs/interaction-coverage.md](docs/interaction-coverage.md) for the full
 status matrix.
@@ -51,17 +52,24 @@ status matrix.
 
 ## Compatibility status
 
-`panelmark-web` currently implements the **core renderer contract** defined in
-`panelmark/docs/renderer-spec/contract.md`:
+`panelmark-web` implements the **core renderer contract** and claims
+**`portable-library-compatible`** status:
 
 - shell hosting via WebSocket session
 - draw-command execution (`WriteCmd`, `FillCmd`; `CursorCmd` ignored)
 - focus routing and dirty-region tracking
 - exit signal handling
+- all 8 required portable interactions (`panelmark_web.interactions`)
+- all 6 required portable widgets (`panelmark_web.widgets`)
 
-It does **not** currently claim `portable-library-compatible` status.  That
-requires a built-in implementation of the required interactions and widgets,
-which is planned for a future phase.
+**Web note:** The portable-library spec describes widgets as blocking
+(`widget.show(sh)` returns after the user acts).  In `panelmark-web` the
+session is async — assign the widget to a panel region and `signal_return()`
+delivers the result when the user acts.  Constructor signatures and value
+semantics match the spec exactly.
+
+See [docs/interaction-coverage.md](docs/interaction-coverage.md) for the
+full status matrix.
 
 ---
 
