@@ -37,16 +37,16 @@ The audit found these main problems:
 
 ### 1.1 Repair overlapping draw-command handling
 
-- [ ] Read [panelmark_web/renderer.py](/home/sirrommit/claude_play/panelmark-web/panelmark_web/renderer.py).
-- [ ] Confirm the current bug:
+- [x] Read [panelmark_web/renderer.py](/home/sirrommit/claude_play/panelmark-web/panelmark_web/renderer.py).
+- [x] Confirm the current bug:
   - `FillCmd` and `WriteCmd` are appended in row/column order
   - later commands do not overwrite earlier cells
   - overlapping command sequences therefore render incorrectly
-- [ ] Rework `_commands_to_html()` so later commands overwrite earlier cells at
+- [x] Rework `_commands_to_html()` so later commands overwrite earlier cells at
   the cell level.
-- [ ] Preserve style information per cell or merged run.
-- [ ] Keep `CursorCmd` ignored.
-- [ ] Keep output HTML simple and deterministic.
+- [x] Preserve style information per cell or merged run.
+- [x] Keep `CursorCmd` ignored.
+- [x] Keep output HTML simple and deterministic.
 
 Implementation guidance:
 
@@ -58,21 +58,21 @@ Implementation guidance:
 
 Required tests:
 
-- [ ] Add a test where `FillCmd` paints a row and a later `WriteCmd` overlays
+- [x] Add a test where `FillCmd` paints a row and a later `WriteCmd` overlays
   text at the same columns.
-- [ ] Add a test where two `WriteCmd`s overlap and the later one wins.
-- [ ] Add a test where styled text overwrites previously unstyled fill.
-- [ ] Keep existing renderer tests passing.
+- [x] Add a test where two `WriteCmd`s overlap and the later one wins.
+- [x] Add a test where styled text overwrites previously unstyled fill.
+- [x] Keep existing renderer tests passing.
 
 
 ## Phase 2 — Fix async WebSocket integration
 
 ### 2.1 Verify the async handler contract
 
-- [ ] Read [panelmark_web/server.py](/home/sirrommit/claude_play/panelmark-web/panelmark_web/server.py).
-- [ ] Read the documented FastAPI usage in
+- [x] Read [panelmark_web/server.py](/home/sirrommit/claude_play/panelmark-web/panelmark_web/server.py).
+- [x] Read the documented FastAPI usage in
   [docs/getting-started.md](/home/sirrommit/claude_play/panelmark-web/docs/getting-started.md).
-- [ ] Check whether FastAPI / Starlette `WebSocket` objects actually support the
+- [x] Check whether FastAPI / Starlette `WebSocket` objects actually support the
   iterator/send API assumed by `handle_connection()`.
 
 Expected likely outcome:
@@ -92,31 +92,31 @@ Choose one of these paths and implement it consistently:
 
 Required outcome:
 
-- [ ] The documented FastAPI example must actually work with the public API.
-- [ ] The code and docs must describe the same async interface.
+- [x] The documented FastAPI example must actually work with the public API.
+- [x] The code and docs must describe the same async interface.
 
 Required tests:
 
-- [ ] Add or update tests for the actual async handler contract.
-- [ ] If using adapters, test both the internal generic path and the adapter.
+- [x] Add or update tests for the actual async handler contract.
+- [x] If using adapters, test both the internal generic path and the adapter.
 
 
 ## Phase 3 — Clean up server message flow
 
 ### 3.1 Remove dead code in exit path
 
-- [ ] Remove the unused `exit_msg` variable in
+- [x] Remove the unused `exit_msg` variable in
   [panelmark_web/server.py](/home/sirrommit/claude_play/panelmark-web/panelmark_web/server.py).
-- [ ] Keep the behavior unchanged unless another test-driven fix is needed.
+- [x] Keep the behavior unchanged unless another test-driven fix is needed.
 
 ### 3.2 Review exit ordering
 
-- [ ] Verify the intended behavior when a key causes both:
+- [x] Verify the intended behavior when a key causes both:
   - a render/focus update
   - and an exit
-- [ ] Ensure the implementation and docs agree that render/focus is sent before
+- [x] Ensure the implementation and docs agree that render/focus is sent before
   exit if both exist.
-- [ ] Add or update tests if this ordering is intended API.
+- [x] Add or update tests if this ordering is intended API.
 
 
 ## Phase 4 — Make the scope explicit in docs
@@ -125,7 +125,7 @@ Required tests:
 
 There is currently no top-level `README.md` in `panelmark-web`.
 
-- [ ] Create [README.md](/home/sirrommit/claude_play/panelmark-web/README.md).
+- [x] Create [README.md](/home/sirrommit/claude_play/panelmark-web/README.md).
 
 The README should clearly state:
 
@@ -145,23 +145,23 @@ Do not claim:
 
 ### 4.2 Update `docs/getting-started.md`
 
-- [ ] Revise the opening section to clarify the current scope:
+- [x] Revise the opening section to clarify the current scope:
   - live transport/runtime + browser client
   - not yet a full built-in interaction library
-- [ ] Fix the FastAPI example so it matches the actual async handler API.
-- [ ] Keep the “define your own Interaction” example, because that matches the
+- [x] Fix the FastAPI example so it matches the actual async handler API.
+- [x] Keep the “define your own Interaction” example, because that matches the
   current implementation reality.
-- [ ] Add one short note explaining that current interaction support depends on
+- [x] Add one short note explaining that current interaction support depends on
   the draw-command renderer and that more complex interactions may need further
   renderer work.
 
 
 ### 4.3 Update `docs/hook-contract-web.md`
 
-- [ ] Keep this doc focused on how `panelmark-web` uses `panelmark-html` hooks.
-- [ ] Add one brief note that panel body HTML is generated from core draw
+- [x] Keep this doc focused on how `panelmark-web` uses `panelmark-html` hooks.
+- [x] Add one brief note that panel body HTML is generated from core draw
   commands, not from a renderer-specific interaction catalog.
-- [ ] Do not imply that `panelmark-web` implements the full portable standard
+- [x] Do not imply that `panelmark-web` implements the full portable standard
   library today.
 
 
@@ -169,7 +169,7 @@ Do not claim:
 
 ### 5.1 Add an interaction coverage section
 
-- [ ] In `README.md` or a dedicated doc, add a simple coverage matrix.
+- [x] In `README.md` or a dedicated doc, add a simple coverage matrix.
 
 It should distinguish:
 
@@ -203,8 +203,8 @@ Required editorial stance:
 
 ### 6.1 Remove the `/ws` hardcoding
 
-- [ ] Read [panelmark_web/static/client.js](/home/sirrommit/claude_play/panelmark-web/panelmark_web/static/client.js).
-- [ ] Replace the hardcoded `/ws` connection path with a configurable hook.
+- [x] Read [panelmark_web/static/client.js](/home/sirrommit/claude_play/panelmark-web/panelmark_web/static/client.js).
+- [x] Replace the hardcoded `/ws` connection path with a configurable hook.
 
 Recommended approaches:
 
@@ -218,13 +218,13 @@ Preferred approach:
 
 Required outcome:
 
-- [ ] Default behavior can still use `/ws`.
-- [ ] Apps mounted under subpaths or alternate websocket routes can override it.
+- [x] Default behavior can still use `/ws`.
+- [x] Apps mounted under subpaths or alternate websocket routes can override it.
 
 Required follow-up:
 
-- [ ] Update examples and docs to show the configuration mechanism.
-- [ ] Add tests if there is a testable JS hook path already in the repo; if not,
+- [x] Update examples and docs to show the configuration mechanism.
+- [x] Add tests if there is a testable JS hook path already in the repo; if not,
   document the mechanism clearly in examples/docs.
 
 
@@ -232,20 +232,20 @@ Required follow-up:
 
 ### 7.1 FastAPI example
 
-- [ ] Update [examples/fastapi_app.py](/home/sirrommit/claude_play/panelmark-web/examples/fastapi_app.py)
+- [x] Update [examples/fastapi_app.py](/home/sirrommit/claude_play/panelmark-web/examples/fastapi_app.py)
   to match the real async API and configurable websocket path.
-- [ ] Make sure the static asset path logic is still correct.
+- [x] Make sure the static asset path logic is still correct.
 
 ### 7.2 Flask example
 
-- [ ] Update [examples/flask_app.py](/home/sirrommit/claude_play/panelmark-web/examples/flask_app.py)
+- [x] Update [examples/flask_app.py](/home/sirrommit/claude_play/panelmark-web/examples/flask_app.py)
   if websocket URL configuration changes.
-- [ ] Keep the example aligned with the docs.
+- [x] Keep the example aligned with the docs.
 
 ### 7.3 Generated example output
 
-- [ ] Review whether files under `examples/out/` need regeneration.
-- [ ] If they are intended as checked-in artifacts, make sure they reflect the
+- [x] Review whether files under `examples/out/` need regeneration.
+- [x] If they are intended as checked-in artifacts, make sure they reflect the
   current behavior and docs.
 
 
@@ -253,7 +253,7 @@ Required follow-up:
 
 ### 8.1 Add explicit compatibility language
 
-- [ ] Add a short statement in docs about renderer-spec status.
+- [x] Add a short statement in docs about renderer-spec status.
 
 Suggested wording direction:
 
@@ -446,15 +446,15 @@ Widget-specific notes:
 
 Before considering this work done, verify all of the following:
 
-- [ ] Overlapping draw commands now render correctly.
-- [ ] The async FastAPI/Starlette path is real, not just documented.
-- [ ] There is no dead unused exit-path code in `server.py`.
-- [ ] `panelmark-web` has a top-level `README.md`.
-- [ ] Docs no longer imply built-in interaction coverage that does not exist.
-- [ ] Interaction coverage is explicitly documented.
-- [ ] The websocket URL is configurable instead of being hardcoded to `/ws`.
-- [ ] Examples match the actual public API.
-- [ ] Tests cover the renderer overlap fix and the async server contract.
+- [x] Overlapping draw commands now render correctly.
+- [x] The async FastAPI/Starlette path is real, not just documented.
+- [x] There is no dead unused exit-path code in `server.py`.
+- [x] `panelmark-web` has a top-level `README.md`.
+- [x] Docs no longer imply built-in interaction coverage that does not exist.
+- [x] Interaction coverage is explicitly documented.
+- [x] The websocket URL is configurable instead of being hardcoded to `/ws`.
+- [x] Examples match the actual public API.
+- [x] Tests cover the renderer overlap fix and the async server contract.
 - [ ] If Phase 9 was completed, required interactions match the portable spec.
 - [ ] If Phase 10 was completed, required widgets match the portable spec.
 
