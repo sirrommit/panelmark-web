@@ -284,9 +284,9 @@ Goal of this phase:
 
 ### 9.1 Create an interaction module structure
 
-- [ ] Add a package such as `panelmark_web/interactions/`.
-- [ ] Add `__init__.py` exports.
-- [ ] Keep naming aligned with the portable library:
+- [x] Add a package such as `panelmark_web/interactions/`.
+- [x] Add `__init__.py` exports.
+- [x] Keep naming aligned with the portable library:
   - `MenuReturn`
   - `NestedMenu`
   - `RadioList`
@@ -320,46 +320,46 @@ Suggested order:
 
 For each interaction:
 
-- [ ] match constructor signature and parameter names
-- [ ] implement `get_value()` semantics from the portable-library spec
-- [ ] implement `set_value()` semantics from the portable-library spec
-- [ ] implement `signal_return()` semantics from the portable-library spec
-- [ ] add renderer tests
+- [x] match constructor signature and parameter names
+- [x] implement `get_value()` semantics from the portable-library spec
+- [x] implement `set_value()` semantics from the portable-library spec
+- [x] implement `signal_return()` semantics from the portable-library spec
+- [x] add renderer tests
 - [ ] add session/integration coverage where the browser transport matters
-- [ ] document it
+- [x] document it
 
 Required interaction-specific notes:
 
 - `MenuReturn`
-  - [ ] current highlighted label via `get_value()`
-  - [ ] mapped payload via `signal_return()`
+  - [x] current highlighted label via `get_value()`
+  - [x] mapped payload via `signal_return()`
 - `NestedMenu`
-  - [ ] support shorthand nested dict form
-  - [ ] support `Leaf(value)`
-  - [ ] preserve ordering
-  - [ ] enforce malformed-input rules from the spec
+  - [x] support shorthand nested dict form
+  - [x] support `Leaf(value)`
+  - [x] preserve ordering
+  - [x] enforce malformed-input rules from the spec
 - `RadioList`
-  - [ ] selected mapped value via `get_value()`
-  - [ ] accept returns same selected value
+  - [x] selected mapped value via `get_value()`
+  - [x] accept returns same selected value
 - `CheckBox`
-  - [ ] full checked-state mapping via `get_value()`
-  - [ ] support `"multi"` and `"single"`
+  - [x] full checked-state mapping via `get_value()`
+  - [x] support `”multi”` and `”single”`
 - `TextBox`
-  - [ ] support `wrap`
-  - [ ] support `readonly`
-  - [ ] support `enter_mode`
+  - [x] support `wrap`
+  - [x] support `readonly`
+  - [x] support `enter_mode`
 - `FormInput`
-  - [ ] support portable field types and validation contract
+  - [x] support portable field types and validation contract
 - `DataclassFormInteraction`
-  - [ ] introspect dataclass instance
-  - [ ] support action list semantics
+  - [x] introspect dataclass instance
+  - [x] support action list semantics
 
 
 ### 9.3 Document interaction coverage after implementation
 
-- [ ] Update the interaction coverage section added in Phase 5.
-- [ ] Move each completed interaction from “not implemented” to “implemented.”
-- [ ] If any interaction still diverges from the portable spec, document the gap
+- [x] Update the interaction coverage section added in Phase 5.
+- [x] Move each completed interaction from “not implemented” to “implemented.”
+- [x] If any interaction still diverges from the portable spec, document the gap
   explicitly instead of silently claiming support.
 
 

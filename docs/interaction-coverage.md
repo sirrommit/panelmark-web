@@ -8,13 +8,17 @@ are implemented in `panelmark-web`.
 
 ## Current status
 
-`panelmark-web` is a **core-renderer-compatible** runtime.  It hosts any
-`Interaction` object whose `render()` method returns standard draw commands
-(`WriteCmd`, `FillCmd`).  It does not currently ship built-in implementations
-of the portable interaction or widget library.
+`panelmark-web` is a **core-renderer-compatible** runtime.  All eight required
+portable interactions are now implemented in `panelmark_web.interactions`.
+Required widgets are not yet implemented.
 
-Application code must supply its own interactions.  See
-[docs/getting-started.md](getting-started.md) for how to define and wire them.
+```python
+from panelmark_web.interactions import (
+    StatusMessage, MenuReturn, RadioList, CheckBox,
+    TextBox, NestedMenu, FormInput, DataclassFormInteraction,
+    Leaf,  # explicit leaf marker for NestedMenu
+)
+```
 
 ---
 
@@ -24,14 +28,14 @@ These are required for `portable-library-compatible` status.
 
 | Interaction | Status | Notes |
 |-------------|--------|-------|
-| `StatusMessage` | Not implemented | — |
-| `MenuReturn` | Not implemented | — |
-| `NestedMenu` | Not implemented | — |
-| `RadioList` | Not implemented | — |
-| `CheckBox` | Not implemented | — |
-| `TextBox` | Not implemented | — |
-| `FormInput` | Not implemented | — |
-| `DataclassFormInteraction` | Not implemented | — |
+| `StatusMessage` | **Implemented** | `panelmark_web.interactions.StatusMessage` |
+| `MenuReturn` | **Implemented** | `panelmark_web.interactions.MenuReturn` |
+| `NestedMenu` | **Implemented** | `panelmark_web.interactions.NestedMenu` |
+| `RadioList` | **Implemented** | `panelmark_web.interactions.RadioList` |
+| `CheckBox` | **Implemented** | `panelmark_web.interactions.CheckBox` |
+| `TextBox` | **Implemented** | `panelmark_web.interactions.TextBox` |
+| `FormInput` | **Implemented** | `panelmark_web.interactions.FormInput` |
+| `DataclassFormInteraction` | **Implemented** | `panelmark_web.interactions.DataclassFormInteraction` |
 
 ---
 
@@ -88,18 +92,18 @@ scope of `panelmark-web`.
 
 ## Roadmap
 
-Implementation of the required interactions and widgets is planned.  Suggested
-order (from the project TODO):
+Required widgets remain:
 
-1. `StatusMessage`
-2. `MenuReturn`
-3. `RadioList`
-4. `CheckBox`
-5. `TextBox`
-6. `NestedMenu`
-7. `FormInput`
-8. `DataclassFormInteraction`
+1. `Alert`
+2. `Confirm`
+3. `InputPrompt`
+4. `ListSelect`
+5. `DataclassForm`
+6. `FilePicker`
 
-Followed by required widgets, then frequently-implemented extras.
+Followed by frequently-implemented extras.
+
+`portable-library-compatible` status will be evaluated after the required
+widget set is implemented.
 
 This document will be updated as items are completed.
