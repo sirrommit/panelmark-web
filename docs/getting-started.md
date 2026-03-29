@@ -6,13 +6,16 @@ It provides the transport and rendering infrastructure to host
 focus transitions, and live rendering of interaction content inside panel
 bodies.
 
-**Current scope:** `panelmark-web` hosts arbitrary server-side `Interaction`
-objects through the core draw-command path.  It does not yet ship a built-in
-interaction or widget library.  You must supply your own interactions (or use
-a future release that implements the portable standard library).  The
-draw-command renderer handles `WriteCmd` and `FillCmd`; more complex
-interactions that depend on renderer-specific features beyond draw commands
-may require additional renderer work.
+`panelmark-web` is both a live web runtime for arbitrary draw-command
+interactions and a renderer that ships the full required portable
+interaction/widget set.  The draw-command renderer handles `WriteCmd` and
+`FillCmd`; any `Interaction` subclass whose `render()` returns only those
+commands works out of the box.  Built-in implementations of all required
+portable interactions and widgets are available in
+`panelmark_web.interactions` and `panelmark_web.widgets` — see
+[docs/interaction-coverage.md](interaction-coverage.md) for the full status
+matrix.  Some optional/frequently-implemented extras from the broader
+ecosystem are not yet present.
 
 ---
 
