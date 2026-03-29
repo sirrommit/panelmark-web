@@ -213,6 +213,30 @@ def ws_endpoint(ws):
 `handle_connection_sync` expects `ws.receive()` to return `None` (or raise)
 when the connection closes — which is exactly what `flask-sock` does.
 
+### Server requirements for Flask
+
+`handle_connection_sync` blocks the thread for the entire WebSocket lifetime.
+The server must give each connection its own thread or coroutine:
+
+| Server | Works? | Command |
+|--------|--------|---------|
+| `flask run` (dev) | **Yes** | `flask run` |
+| gunicorn + gevent | **Yes** | `gunicorn -k gevent -w 4 myapp:app` |
+| gunicorn + eventlet | **Yes** | `gunicorn -k eventlet -w 4 myapp:app` |
+| gunicorn sync workers | **No** | One worker blocked per connection |
+| uWSGI (standard) | **No** | |
+
+For production, gevent is the recommended option:
+
+```bash
+pip install gunicorn gevent
+gunicorn -k gevent -w 4 "examples.flask_app:app"
+```
+
+If you want simpler production deployment without the gevent dependency,
+use the FastAPI path with `uvicorn` instead — async handles many concurrent
+WebSocket connections without any threading configuration.
+
 ## Full examples
 
 - [`examples/fastapi_app.py`](../examples/fastapi_app.py) — FastAPI (async)
