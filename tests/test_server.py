@@ -52,23 +52,29 @@ class ExitInteraction(Interaction):
         return True, "done"
 
 
+class _ConnectionClosed(Exception):
+    pass
+
+
 class MockWebSocket:
-    """In-memory WebSocket stub with send/recv queues."""
+    """In-memory WebSocket stub matching the handle_connection interface.
+
+    Supports:
+        await ws.recv() -> str  (raises _ConnectionClosed when queue is empty)
+        await ws.send(str)
+    """
 
     def __init__(self, messages: list[dict]):
         self._incoming = [json.dumps(m) for m in messages]
         self.sent: list[dict] = []
 
+    async def recv(self) -> str:
+        if not self._incoming:
+            raise _ConnectionClosed
+        return self._incoming.pop(0)
+
     async def send(self, data: str):
         self.sent.append(json.loads(data))
-
-    def __aiter__(self):
-        return self
-
-    async def __anext__(self):
-        if not self._incoming:
-            raise StopAsyncIteration
-        return self._incoming.pop(0)
 
 
 def make_shell_factory(interaction_class=StubInteraction):

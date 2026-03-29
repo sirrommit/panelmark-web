@@ -58,18 +58,27 @@ def _dispatch(session: Session, raw: str) -> tuple[str | None, str | None]:
 
 
 async def handle_connection(websocket, shell_factory):
-    """Async WebSocket connection handler (FastAPI / Starlette / aiohttp).
+    """Async WebSocket connection handler.
 
     websocket must support:
-        async for raw in websocket  -- yields str messages
+        await websocket.recv() -> str   -- raises or returns None on close
         await websocket.send(str)
+
+    This matches the ``websockets`` library interface.  For FastAPI / Starlette
+    use ``StarletteAdapter`` from ``panelmark_web.adapters``.
 
     shell_factory() -> Shell is called once per connection.
     """
     shell = shell_factory()
     session = Session(shell)
 
-    async for raw in websocket:
+    while True:
+        try:
+            raw = await websocket.recv()
+        except Exception:
+            break
+        if raw is None:
+            break
         reply, action = _dispatch(session, raw)
         if reply is not None:
             await websocket.send(reply)

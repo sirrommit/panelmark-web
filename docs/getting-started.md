@@ -103,6 +103,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from panelmark_html import render_document
 from panelmark_web.server import handle_connection
+from panelmark_web.adapters import StarletteAdapter
 
 app = FastAPI()
 
@@ -125,8 +126,12 @@ async def index():
 @app.websocket("/ws")
 async def ws_endpoint(websocket: WebSocket):
     await websocket.accept()
-    await handle_connection(websocket, shell_factory=make_shell)
+    await handle_connection(StarletteAdapter(websocket), shell_factory=make_shell)
 ```
+
+`StarletteAdapter` translates Starlette's `receive_text()` / `send_text()` API
+into the `recv()` / `send()` interface that `handle_connection` expects.
+`WebSocketDisconnect` is caught automatically and exits the connection cleanly.
 
 ---
 

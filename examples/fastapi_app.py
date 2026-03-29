@@ -19,6 +19,7 @@ from panelmark.draw import WriteCmd, FillCmd, RenderContext
 from panelmark_html import render_document
 
 from panelmark_web.server import handle_connection
+from panelmark_web.adapters import StarletteAdapter
 
 
 # ---------------------------------------------------------------------------
@@ -127,4 +128,4 @@ async def index():
 @app.websocket("/ws")
 async def ws_endpoint(websocket: WebSocket):
     await websocket.accept()
-    await handle_connection(websocket, shell_factory=make_shell)
+    await handle_connection(StarletteAdapter(websocket), shell_factory=make_shell)
