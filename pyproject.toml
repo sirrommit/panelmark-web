@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "panelmark-web"
+version = "0.1.0"
+description = "Live web renderer for the panelmark ecosystem"
+requires-python = ">=3.11"
+dependencies = [
+    "panelmark",
+    "panelmark-html",
+]
+
+[project.optional-dependencies]
+fastapi = ["fastapi", "uvicorn[standard]"]
+dev = ["pytest", "pytest-asyncio"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["panelmark_web"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
