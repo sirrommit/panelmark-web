@@ -14,9 +14,12 @@ from panelmark import Shell
 from panelmark_web.server import handle_connection
 from panelmark_web.interactions import (
     CheckBox,
+    ListView,
+    MenuFunction,
     MenuReturn,
     RadioList,
     StatusMessage,
+    TableView,
     TextBox,
     NestedMenu,
 )
@@ -547,5 +550,187 @@ class TestListSelectIntegration:
             ])
             await handle_connection(ws, factory)
             assert "exit" in sent_types(ws)
+
+        run(_run())
+
+
+# ---------------------------------------------------------------------------
+# MenuFunction
+# ---------------------------------------------------------------------------
+
+class TestMenuFunctionIntegration:
+    def _factory(self):
+        shell = Shell(TWO_PANEL)
+
+        def _on_save(sh):
+            sh.update("status", ("success", "saved"))
+
+        shell.assign("main", MenuFunction({"Save": _on_save, "Noop": lambda sh: None}))
+        shell.assign("status", StatusMessage())
+        shell.set_focus("main")
+        return shell
+
+    def test_connect_renders_menu_items(self):
+        async def _run():
+            ws = MockWebSocket([TWO_CONNECT])
+            await handle_connection(ws, self._factory)
+            h = html_for(ws, region="main")
+            assert "Save" in h
+
+        run(_run())
+
+    def test_enter_invokes_callback_and_re_renders_status(self):
+        async def _run():
+            ws = MockWebSocket([TWO_CONNECT, key("KEY_ENTER")])
+            await handle_connection(ws, self._factory)
+            snapshots = all_html_for(ws, region="status")
+            assert len(snapshots) >= 2
+            assert "saved" in snapshots[-1]
+
+        run(_run())
+
+    def test_enter_does_not_send_exit(self):
+        async def _run():
+            ws = MockWebSocket([key("KEY_ENTER")])
+            await handle_connection(ws, self._factory)
+            assert "exit" not in sent_types(ws)
+
+        run(_run())
+
+    def test_key_down_re_renders_main(self):
+        async def _run():
+            ws = MockWebSocket([CONNECT, key("KEY_DOWN")])
+            await handle_connection(ws, self._factory)
+            snapshots = all_html_for(ws, region="main")
+            assert len(snapshots) >= 2
+
+        run(_run())
+
+
+# ---------------------------------------------------------------------------
+# ListView
+# ---------------------------------------------------------------------------
+
+class TestListViewIntegration:
+    def _factory(self):
+        shell = Shell(SINGLE)
+        shell.assign("main", ListView(["alpha", "beta", "gamma"]))
+        # ListView is not focusable; focus something else if needed,
+        # but assign anyway to verify rendering
+        return shell
+
+    def test_connect_renders_list_items(self):
+        async def _run():
+            ws = MockWebSocket([CONNECT])
+            await handle_connection(ws, self._factory)
+            h = html_for(ws, region="main")
+            assert "alpha" in h
+            assert "beta" in h
+
+        run(_run())
+
+    def test_render_produces_pre_elements(self):
+        async def _run():
+            ws = MockWebSocket([CONNECT])
+            await handle_connection(ws, self._factory)
+            h = html_for(ws, region="main")
+            assert "<pre" in h
+
+        run(_run())
+
+    def test_update_via_shell_re_renders(self):
+        """shell.update() on a ListView replaces the items and marks it dirty."""
+        from panelmark.interactions.base import Interaction
+        from panelmark.draw import WriteCmd, RenderContext
+
+        class _Trigger(Interaction):
+            def render(self, ctx, focused=False):
+                return [WriteCmd(row=0, col=0, text="trigger".ljust(ctx.width))]
+            def handle_key(self, key):
+                if key == "KEY_ENTER":
+                    self._shell.update("main", ["x", "y", "z"])
+                    return True, None
+                return False, None
+            def get_value(self): return None
+            def set_value(self, v): pass
+
+        TWO_FOCUSABLE = """
+|=====|
+|{20R $trigger$ }|
+|=====|
+|{20R $main$ }|
+|=====|
+"""
+        def factory():
+            shell = Shell(TWO_FOCUSABLE)
+            shell.assign("trigger", _Trigger())
+            shell.assign("main", ListView(["a", "b"]))
+            shell.set_focus("trigger")
+            return shell
+
+        connect = {"type": "connect", "v": 1, "panels": [
+            {"region": "trigger", "width": 20, "height": 3},
+            {"region": "main", "width": 20, "height": 3},
+        ]}
+
+        async def _run():
+            ws = MockWebSocket([connect, key("KEY_ENTER")])
+            await handle_connection(ws, factory)
+            snapshots = all_html_for(ws, region="main")
+            assert len(snapshots) >= 2
+            assert "x" in snapshots[-1]
+
+        run(_run())
+
+
+# ---------------------------------------------------------------------------
+# TableView
+# ---------------------------------------------------------------------------
+
+class TestTableViewIntegration:
+    def _factory(self):
+        shell = Shell(SINGLE)
+        shell.assign("main", TableView(
+            columns=[("Name", 8), ("Score", 5)],
+            rows=[["Alice", "100"], ["Bob", "85"], ["Carol", "92"]],
+        ))
+        shell.set_focus("main")
+        return shell
+
+    def test_connect_renders_header_and_rows(self):
+        async def _run():
+            ws = MockWebSocket([CONNECT])
+            await handle_connection(ws, self._factory)
+            h = html_for(ws, region="main")
+            assert "Name" in h
+            assert "Alice" in h
+
+        run(_run())
+
+    def test_render_produces_pre_elements(self):
+        async def _run():
+            ws = MockWebSocket([CONNECT])
+            await handle_connection(ws, self._factory)
+            h = html_for(ws, region="main")
+            assert "<pre" in h
+
+        run(_run())
+
+    def test_key_down_re_renders(self):
+        async def _run():
+            ws = MockWebSocket([CONNECT, key("KEY_DOWN")])
+            await handle_connection(ws, self._factory)
+            snapshots = all_html_for(ws, region="main")
+            assert len(snapshots) >= 2
+
+        run(_run())
+
+    def test_does_not_send_exit(self):
+        async def _run():
+            ws = MockWebSocket([
+                key("KEY_DOWN"), key("KEY_DOWN"), key("KEY_DOWN"),
+            ])
+            await handle_connection(ws, self._factory)
+            assert "exit" not in sent_types(ws)
 
         run(_run())

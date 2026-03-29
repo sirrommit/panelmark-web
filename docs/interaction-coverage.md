@@ -78,10 +78,10 @@ semantics, and return values match the portable spec exactly.
 
 | Interaction / Widget | Status | Notes |
 |----------------------|--------|-------|
-| `MenuFunction` | Not implemented | — |
-| `ListView` | Not implemented | — |
+| `MenuFunction` | **Implemented** | `panelmark_web.interactions.MenuFunction` |
+| `ListView` | **Implemented** | `panelmark_web.interactions.ListView` |
 | `TreeView` | Not implemented | — |
-| `TableView` | Not implemented | — |
+| `TableView` | **Implemented** | `panelmark_web.interactions.TableView` |
 | `DatePicker` | Not implemented | — |
 | `Progress` | Not implemented | — |
 | `Spinner` | Not implemented | — |

@@ -11,10 +11,13 @@ from panelmark_web.interactions import (
     DataclassFormInteraction,
     FormInput,
     Leaf,
+    ListView,
+    MenuFunction,
     MenuReturn,
     NestedMenu,
     RadioList,
     StatusMessage,
+    TableView,
     TextBox,
 )
 
@@ -536,3 +539,201 @@ class TestDataclassFormInteraction:
         cmds = f.render(CTX, focused=True)
         texts = " ".join(c.text for c in cmds if isinstance(c, WriteCmd))
         assert "host" in texts
+
+
+# ---------------------------------------------------------------------------
+# MenuFunction
+# ---------------------------------------------------------------------------
+
+class TestMenuFunction:
+    def _menu(self):
+        return MenuFunction({
+            "Save":   lambda sh: sh.update("status", "saved"),
+            "Reload": lambda sh: sh.update("status", "reloaded"),
+        })
+
+    def test_initial_get_value_is_first_label(self):
+        m = self._menu()
+        assert m.get_value() == "Save"
+
+    def test_last_activated_none_initially(self):
+        m = self._menu()
+        assert m.last_activated is None
+
+    def test_key_down_moves_cursor(self):
+        m = self._menu()
+        changed, _ = m.handle_key("KEY_DOWN")
+        assert changed is True
+        assert m.get_value() == "Reload"
+
+    def test_key_up_does_not_go_before_first(self):
+        m = self._menu()
+        changed, _ = m.handle_key("KEY_UP")
+        assert changed is False
+
+    def test_key_down_does_not_go_past_last(self):
+        m = self._menu()
+        m.handle_key("KEY_DOWN")
+        changed, _ = m.handle_key("KEY_DOWN")
+        assert changed is False
+
+    def test_enter_invokes_callback(self):
+        calls = []
+        m = MenuFunction({"Go": lambda sh: calls.append(sh)})
+        m._shell = object()  # stand-in for a real shell
+        m.handle_key("KEY_ENTER")
+        assert len(calls) == 1
+        assert calls[0] is m._shell
+
+    def test_enter_sets_last_activated(self):
+        m = MenuFunction({"Go": lambda sh: None})
+        m._shell = object()
+        m.handle_key("KEY_ENTER")
+        assert m.last_activated == "Go"
+
+    def test_signal_return_always_false(self):
+        m = MenuFunction({"Go": lambda sh: None})
+        m._shell = object()
+        m.handle_key("KEY_ENTER")
+        assert m.signal_return() == (False, None)
+
+    def test_set_value_moves_cursor(self):
+        m = self._menu()
+        m.set_value("Reload")
+        assert m.get_value() == "Reload"
+
+    def test_set_value_unknown_ignored(self):
+        m = self._menu()
+        m.set_value("Missing")
+        assert m.get_value() == "Save"
+
+    def test_render_produces_write_cmds(self):
+        m = self._menu()
+        cmds = m.render(CTX, focused=True)
+        texts = " ".join(c.text for c in cmds if isinstance(c, WriteCmd))
+        assert "Save" in texts
+
+
+# ---------------------------------------------------------------------------
+# ListView
+# ---------------------------------------------------------------------------
+
+class TestListView:
+    def test_get_value_returns_list(self):
+        lv = ListView(["alpha", "beta", "gamma"])
+        assert lv.get_value() == ["alpha", "beta", "gamma"]
+
+    def test_not_focusable(self):
+        assert ListView([]).is_focusable is False
+
+    def test_signal_return_always_false(self):
+        assert ListView(["a"]).signal_return() == (False, None)
+
+    def test_handle_key_always_false(self):
+        lv = ListView(["a"])
+        changed, _ = lv.handle_key("KEY_DOWN")
+        assert changed is False
+
+    def test_set_value_replaces_list(self):
+        lv = ListView(["a", "b"])
+        lv.set_value(["x", "y", "z"])
+        assert lv.get_value() == ["x", "y", "z"]
+
+    def test_render_shows_items(self):
+        lv = ListView(["first", "second"])
+        cmds = lv.render(CTX)
+        texts = " ".join(c.text for c in cmds if isinstance(c, WriteCmd))
+        assert "first" in texts
+        assert "second" in texts
+
+    def test_render_clips_to_height(self):
+        lv = ListView([str(i) for i in range(20)])
+        cmds = lv.render(CTX)  # CTX height = 5
+        write_cmds = [c for c in cmds if isinstance(c, WriteCmd)]
+        assert len(write_cmds) <= CTX.height
+
+    def test_get_value_returns_copy(self):
+        lv = ListView(["a"])
+        v = lv.get_value()
+        v.append("b")
+        assert lv.get_value() == ["a"]  # internal list unchanged
+
+
+# ---------------------------------------------------------------------------
+# TableView
+# ---------------------------------------------------------------------------
+
+class TestTableView:
+    def _table(self):
+        return TableView(
+            columns=[("Name", 8), ("Age", 4), ("City", 10)],
+            rows=[
+                ["Alice", "30", "New York"],
+                ["Bob",   "25", "London"],
+                ["Carol", "35", "Paris"],
+            ],
+        )
+
+    def test_initial_cursor_is_zero(self):
+        assert self._table().get_value() == 0
+
+    def test_key_down_advances_cursor(self):
+        t = self._table()
+        changed, val = t.handle_key("KEY_DOWN")
+        assert changed is True
+        assert val == 1
+
+    def test_key_up_does_not_go_before_zero(self):
+        t = self._table()
+        changed, _ = t.handle_key("KEY_UP")
+        assert changed is False
+        assert t.get_value() == 0
+
+    def test_key_down_does_not_go_past_last(self):
+        t = self._table()
+        t.handle_key("KEY_DOWN")
+        t.handle_key("KEY_DOWN")
+        changed, _ = t.handle_key("KEY_DOWN")
+        assert changed is False
+        assert t.get_value() == 2
+
+    def test_set_value_moves_cursor(self):
+        t = self._table()
+        t.set_value(2)
+        assert t.get_value() == 2
+
+    def test_set_value_out_of_range_ignored(self):
+        t = self._table()
+        t.set_value(99)
+        assert t.get_value() == 0
+
+    def test_signal_return_always_false(self):
+        t = self._table()
+        t.handle_key("KEY_DOWN")
+        assert t.signal_return() == (False, None)
+
+    def test_render_includes_header(self):
+        t = self._table()
+        cmds = t.render(CTX, focused=True)
+        texts = " ".join(c.text for c in cmds if isinstance(c, WriteCmd))
+        assert "Name" in texts
+        assert "Age" in texts
+
+    def test_render_includes_data_rows(self):
+        t = self._table()
+        cmds = t.render(CTX)
+        texts = " ".join(c.text for c in cmds if isinstance(c, WriteCmd))
+        assert "Alice" in texts
+
+    def test_render_header_always_row_zero(self):
+        t = self._table()
+        # Move cursor to last row
+        t.set_value(2)
+        cmds = t.render(CTX, focused=True)
+        row_zero = next(c for c in cmds if isinstance(c, WriteCmd) and c.row == 0)
+        assert "Name" in row_zero.text  # header still at row 0
+
+    def test_empty_table_renders_without_error(self):
+        t = TableView(columns=[("A", 5)], rows=[])
+        cmds = t.render(CTX)
+        assert any(isinstance(c, WriteCmd) for c in cmds)  # header present
