@@ -325,7 +325,7 @@ For each interaction:
 - [x] implement `set_value()` semantics from the portable-library spec
 - [x] implement `signal_return()` semantics from the portable-library spec
 - [x] add renderer tests
-- [ ] add session/integration coverage where the browser transport matters
+- [x] add session/integration coverage where the browser transport matters
 - [x] document it
 
 Required interaction-specific notes:
@@ -413,7 +413,7 @@ For each widget:
 - [x] match portable constructor signature as closely as the current spec allows
 - [x] implement portable return semantics
 - [x] add tests
-- [ ] add browser/session integration coverage if applicable
+- [x] add browser/session integration coverage if applicable
 - [x] document it
 
 Widget-specific notes:
