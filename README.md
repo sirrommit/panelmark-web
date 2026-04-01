@@ -24,11 +24,18 @@ WebSocket connection is the session lifetime.
 Beyond the transport and rendering infrastructure, `panelmark-web` ships
 built-in implementations of the full portable standard library:
 
-- **Interactions** (`panelmark_web.interactions`): `StatusMessage`,
-  `MenuReturn`, `RadioList`, `CheckBox`, `TextBox`, `NestedMenu`,
-  `FormInput`, `DataclassFormInteraction`
-- **Widgets** (`panelmark_web.widgets`): `Alert`, `Confirm`, `InputPrompt`,
-  `ListSelect`, `DataclassForm`, `FilePicker`
+- **Interactions** (`panelmark_web.interactions`): all 8 required portable
+  interactions — `StatusMessage`, `MenuReturn`, `RadioList`, `CheckBox`,
+  `TextBox`, `NestedMenu`, `FormInput`, `DataclassFormInteraction` — plus
+  `MenuFunction`, `ListView`, `TableView`.
+  See [portable library spec](https://github.com/sirrommit/panelmark-docs/blob/main/docs/renderer-spec/portable-library.md)
+  for the full normative specification.
+
+- **Widgets** (`panelmark_web.widgets`): all 6 required portable widgets —
+  `Alert`, `Confirm`, `InputPrompt`, `ListSelect`, `DataclassForm`, `FilePicker`.
+  Web-specific note: widgets are async/non-blocking; see
+  [overview](https://github.com/sirrommit/panelmark-docs/blob/main/docs/panelmark-web/overview.md)
+  for the async widget model.
 
 Application code can also supply arbitrary custom `Interaction` objects — any
 `render()` method that returns `WriteCmd` and `FillCmd` commands works out of
@@ -36,6 +43,22 @@ the box.
 
 See [docs/interaction-coverage.md](docs/interaction-coverage.md) for the full
 status matrix.
+
+## What is not implemented
+
+The following optional interactions and widgets from the portable library are
+**not** implemented in this version:
+
+| Item | Type | Notes |
+|------|------|-------|
+| `TreeView` | Interaction | Not implemented |
+| `DatePicker` | Widget | Not implemented |
+| `Progress` | Widget | Not implemented |
+| `Spinner` | Widget | Not implemented |
+| `Toast` | Widget | Not implemented |
+
+See the [interaction coverage matrix](docs/interaction-coverage.md) for the full
+status of every portable interaction, widget, and draw command.
 
 ---
 
@@ -84,8 +107,24 @@ pip install panelmark-web[flask]     # Flask + flask-sock
 
 ## Quick start
 
-See [docs/getting-started.md](docs/getting-started.md) for a step-by-step
+See [docs/getting-started.md](https://github.com/sirrommit/panelmark-docs/blob/main/docs/panelmark-web/getting-started.md) for a step-by-step
 guide including interaction definition, server wiring, and browser setup.
 
 See [examples/fastapi_app.py](examples/fastapi_app.py) and
 [examples/flask_app.py](examples/flask_app.py) for working server examples.
+
+---
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Getting Started](https://github.com/sirrommit/panelmark-docs/blob/main/docs/panelmark-web/getting-started.md) | Step-by-step guide: interaction definition, FastAPI/Flask wiring, browser setup |
+| [Interaction Coverage](docs/interaction-coverage.md) | Status matrix: every portable interaction, widget, and draw command |
+| [WebSocket Protocol](docs/protocol.md) | Client→server and server→client message format; key mapping reference |
+| [Hook Usage](docs/hook-usage.md) | How panelmark-web reads and writes the panelmark-html DOM hook contract |
+| [DOM Hook Contract](https://github.com/sirrommit/panelmark-html/blob/main/docs/hook-contract.md) | Stable DOM interface defined by panelmark-html that this package depends on |
+| [Portable Library Spec](https://github.com/sirrommit/panelmark-docs/blob/main/docs/renderer-spec/portable-library.md) | Normative spec for all 8 portable interactions and 6 portable widgets |
+| [Renderer Spec](https://github.com/sirrommit/panelmark-docs/blob/main/docs/renderer-spec/overview.md) | Core renderer contract; compatibility levels; extension policy |
+| [Shell Language](https://github.com/sirrommit/panelmark-docs/blob/main/docs/shell-language/overview.md) | ASCII-art layout syntax reference |
+| [Ecosystem Overview](https://github.com/sirrommit/panelmark-docs/blob/main/docs/ecosystem.md) | How panelmark-web fits into the panelmark package ecosystem |
