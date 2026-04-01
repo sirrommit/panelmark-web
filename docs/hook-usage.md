@@ -1,3 +1,6 @@
+> **Note:** This document is also mirrored at
+> [panelmark-docs](https://github.com/sirrommit/panelmark-docs/blob/main/docs/panelmark-web/hook-usage.md).
+
 # panelmark-web DOM Hook Usage
 
 This document describes how `panelmark-web` reads and writes the stable DOM
