@@ -1,3 +1,6 @@
+> **Note:** This document is also available on
+> [panelmark-docs](https://github.com/sirrommit/panelmark-docs/blob/main/docs/panelmark-web/getting-started.md).
+
 # Getting Started with panelmark-web
 
 `panelmark-web` is a live web session runtime for the panelmark ecosystem.
