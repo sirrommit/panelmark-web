@@ -1,7 +1,7 @@
 # Interaction Coverage
 
 This document tracks which interactions and widgets from the
-[panelmark portable-library spec](https://github.com/sirrommit/panelmark/blob/main/docs/renderer-spec/portable-library.md)
+[panelmark portable-library spec](https://github.com/sirrommit/panelmark-docs/blob/main/docs/renderer-spec/portable-library.md)
 are implemented in `panelmark-web`.
 
 ---
@@ -104,5 +104,5 @@ Any custom `Interaction` whose `render()` produces only `WriteCmd` and
 
 ## Roadmap
 
-Frequently-implemented extras (`MenuFunction`, `ListView`, `TreeView`,
-`TableView`, `DatePicker`, `Progress`, `Spinner`, `Toast`) are future work.
+Not-yet-implemented optional items: `TreeView`, `DatePicker`, `Progress`,
+`Spinner`, `Toast`.
