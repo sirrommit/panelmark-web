@@ -6,11 +6,27 @@ build-backend = "hatchling.build"
 name = "panelmark-web"
 version = "0.1.0"
 description = "Live web renderer for the panelmark ecosystem"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Timothy Morris PhD", email = "sirrommit@gmail.com" }]
 requires-python = ">=3.11"
-dependencies = [
-    "panelmark",
-    "panelmark-html",
+keywords = ["ui", "layout", "web", "websocket", "renderer", "panelmark"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: User Interfaces",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
+dependencies = [
+    "panelmark>=0.1.0",
+    "panelmark-html>=0.1.0",
+]
+
+[project.urls]
+Repository = "https://github.com/sirrommit/panelmark-web"
 
 [project.optional-dependencies]
 fastapi = ["fastapi", "uvicorn[standard]"]
