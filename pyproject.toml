@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "panelmark-web"
-version = "0.1.0"
+version = "0.2.0"
 description = "Live web renderer for the panelmark ecosystem"
 readme = "README.md"
 license = { text = "MIT" }
@@ -21,8 +21,8 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-    "panelmark>=0.1.0",
-    "panelmark-html>=0.1.0",
+    "panelmark>=0.2.0",
+    "panelmark-html>=0.2.0",
 ]
 
 [project.urls]
